@@ -50,6 +50,12 @@
       return "Couldn't find this on YouTube.";
     if (r.includes("video unavailable"))
       return "YouTube took down this video.";
+    if (r.includes("sign in to confirm") || r.includes("not a bot") || r.includes("confirm you"))
+      return "YouTube is blocking this server's IP as a bot. (Common on cloud hosts like Render — needs yt-dlp cookies or self-hosting.)";
+    if (r.includes("429") || r.includes("too many requests"))
+      return "YouTube rate-limited this server. Try again in a few minutes.";
+    if (r.includes("403") || r.includes("forbidden"))
+      return "YouTube refused this request — usually IP-based bot detection on cloud hosts.";
     if (r.includes("googlevideo") || r.includes("cipher"))
       return "YouTube blocked the download. Try again in a minute.";
     if (r.includes("not a recognised") || r.includes("not a recognized"))
@@ -425,7 +431,14 @@
 
   async function fetchAudioStreamed(videoId, onProgress) {
     const r = await fetch(workerUrl(`/audio/${encodeURIComponent(videoId)}`));
-    if (!r.ok) throw new Error(`audio fetch ${r.status}`);
+    if (!r.ok) {
+      // Surface the worker's error body so the user sees the real cause
+      // (e.g. "yt-dlp exited 1: Sign in to confirm you're not a bot").
+      const txt = await r.text().catch(() => "");
+      let msg = txt;
+      try { msg = JSON.parse(txt).error ?? txt; } catch {}
+      throw new Error(`audio fetch ${r.status}: ${(msg || "no body").slice(0, 300)}`);
+    }
     const totalHeader = r.headers.get("Content-Length");
     const total = totalHeader ? parseInt(totalHeader, 10) : null;
     if (!r.body) {
