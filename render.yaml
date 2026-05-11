@@ -1,0 +1,26 @@
+# Render Blueprint — one-click deploy.
+#
+# Push this repo to GitHub/GitLab, then in Render:
+#   New + → Blueprint → pick the repo. Render reads this file, builds the
+#   Dockerfile, and deploys.
+#
+# Notes:
+# - Free plan: 512 MB RAM, sleeps after ~15 minutes of inactivity. First
+#   request after sleep takes 30–60s to spin back up.
+# - Render injects $PORT (usually 10000); the Node server reads it via
+#   `process.env.PORT ?? "8787"`.
+# - The whole filesystem is ephemeral, but `/tmp` is writable — yt-dlp's
+#   temp m4a lives there and is deleted as the response stream closes.
+
+services:
+  - type: web
+    name: musicdownweb
+    runtime: docker
+    plan: free
+    region: oregon          # change to ohio / frankfurt / singapore if closer
+    dockerfilePath: ./Dockerfile
+    autoDeploy: true
+    healthCheckPath: /health
+    envVars:
+      - key: ALLOWED_ORIGINS
+        value: "*"

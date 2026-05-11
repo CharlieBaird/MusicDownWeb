@@ -8,10 +8,17 @@ MusicDownWeb — a browser-first sibling of [MusicDown](../MusicDown/). Same UX 
 
 Narrative + deploy notes are in [README.md](README.md). What follows is operational guidance for future Claude sessions.
 
+## Deploy targets
+
+- **Self-host (Pi / any Linux box)** — `docker compose up -d --build`. Persistent, always-on, fast.
+- **Render free tier** — `render.yaml` Blueprint at the repo root. Free, public HTTPS URL. Sleeps after 15 min idle (cold start ~30–60s).
+- **Cloudflare Workers** — Resolve and match would work, but `/audio/:id` cannot run yt-dlp (no subprocess on Workers). Effectively metadata-only until po_token automation lands. Not currently a viable target.
+- **Hetzner / VPS + Caddy + WireGuard** — Sibling MusicDown's planned setup also fits this app — same compose, just behind a different vhost.
+
 ## Commands
 
 ```sh
-# Recommended deploy (matches sibling MusicDown's pattern)
+# Recommended self-host (matches sibling MusicDown's pattern)
 docker compose up -d --build           # → http://localhost:8787
 docker compose logs -f                 # tail
 docker compose down                    # stop

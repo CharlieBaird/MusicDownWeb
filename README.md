@@ -40,7 +40,7 @@ A pure-browser version is impossible. CORS blocks any webpage from fetching Spot
 
 ## Deployment
 
-### Pi (Docker) — recommended
+### Pi (Docker) — recommended for self-host
 
 ```sh
 docker compose up -d --build
@@ -50,6 +50,22 @@ docker compose up -d --build
 The image ships Node + `yt-dlp` (via pip) + `ffmpeg`. Same `docker compose` invocation works on Pi 4/5. Aarch64 wheels exist for everything we depend on. Tail logs with `docker compose logs -f`.
 
 To put it behind your existing Caddy / VPS / WireGuard setup (per the sibling [MusicDown's ONBOARDING](../MusicDown/ONBOARDING.md)), route `<some-host>` → `pi:8787`. No CORS needed since the frontend is same-origin with the API.
+
+### Render (free tier) — public URL in a few clicks
+
+Push this repo to GitHub (or GitLab), then in [Render](https://render.com):
+
+1. Sign in with GitHub
+2. **New +** → **Blueprint** → select the repo
+3. Render reads `render.yaml`, builds the Dockerfile, and gives you a public URL like `https://musicdownweb.onrender.com`
+
+Caveats baked into the free plan:
+
+- **Sleeps after ~15 minutes of inactivity.** First request after that takes 30–60s while the container wakes up. Friends visiting after lunch will see a hung screen for a minute.
+- 512 MB RAM, 0.1 CPU. Concurrent downloads of huge playlists may OOM — the per-track audio is small (one m4a at a time on disk), but yt-dlp+ffmpeg together aren't tiny.
+- Ephemeral filesystem. `/tmp` is writable so yt-dlp works; nothing persists across deploys (which is fine, we have no state).
+
+When you outgrow this, the [Hetzner + Caddy + WireGuard plan](../MusicDown/ONBOARDING.md) in the sibling project is the next stop.
 
 ### Pi (bare Node) — alternative
 
