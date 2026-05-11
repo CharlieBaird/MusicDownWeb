@@ -1,0 +1,8 @@
+name = "musicdownweb"
+main = "src/index.ts"
+compatibility_date = "2026-01-01"
+compatibility_flags = ["nodejs_compat"]
+
+# CORS origins allowed to call this Worker. Override per-environment.
+[vars]
+ALLOWED_ORIGINS = "http://localhost:8080,http://localhost:5173"

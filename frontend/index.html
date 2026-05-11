@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="theme-color" content="#F4EDE0">
+  <meta name="description" content="Rip songs, albums, and playlists from a Spotify or Apple Music link — entirely in your browser. Audio sourced from YouTube.">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="style.css">
+  <title>MusicDownWeb</title>
+</head>
+<body>
+  <main>
+    <header class="masthead">
+      <a class="wordmark" href="/" aria-label="MusicDownWeb — home">MusicDownWeb</a>
+      <span class="local-badge" title="All processing happens in your browser. The worker only proxies the few origins that block CORS.">local</span>
+    </header>
+
+    <section id="empty" class="empty-state">
+      <h1 class="hero">Rip songs, albums &amp; playlists in your <em>browser</em>.</h1>
+      <p class="lede">
+        Paste a Spotify or Apple Music URL. We resolve the metadata, find each
+        track on YouTube, tag the audio, and hand it to you — all in this tab.
+        No accounts. No installs. No backend storing your downloads.
+      </p>
+    </section>
+
+    <form id="form" class="dropbox" autocomplete="off" novalidate>
+      <input
+        id="url"
+        name="url"
+        type="url"
+        required
+        autocomplete="off"
+        autocapitalize="off"
+        autocorrect="off"
+        spellcheck="false"
+        inputmode="url"
+        aria-label="Spotify or Apple Music URL"
+        placeholder="https://open.spotify.com/album/…">
+      <button type="submit" aria-label="Start download">Go</button>
+    </form>
+
+    <p id="what-works" class="what-works">
+      Works with: <span>spotify.com/track</span> · <span>spotify.com/album</span> · <span>spotify.com/playlist</span> · <span>music.apple.com/album</span> · <span>music.apple.com/playlist</span>
+    </p>
+
+    <section id="job" hidden></section>
+  </main>
+
+  <!-- JSZip for in-memory archive build. CDN keeps the frontend tree small;
+       vendor locally later if you want fully offline. -->
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js" defer></script>
+  <script src="config.js" defer></script>
+  <script src="mp4-tag.js" defer></script>
+  <script src="match.js" defer></script>
+  <script src="app.js" defer></script>
+</body>
+</html>
