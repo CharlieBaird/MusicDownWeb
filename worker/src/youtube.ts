@@ -134,23 +134,29 @@ async function detectYtDlp(): Promise<void> {
     if (ok) {
       _ytdlpFetch = mod.fetchAudioYtDlp;
       _preferYtDlp = true;
+      // eslint-disable-next-line no-console
+      console.log("[mdw] audio path: yt-dlp");
     } else {
       _preferYtDlp = false;
+      // eslint-disable-next-line no-console
+      console.warn("[mdw] yt-dlp not detected on PATH — falling back to youtubei.js (likely broken)");
     }
-  } catch {
+  } catch (e) {
     _preferYtDlp = false;
+    // eslint-disable-next-line no-console
+    console.warn("[mdw] yt-dlp module failed to import:", (e as Error).message);
   }
 }
 
 export async function fetchAudioStream(videoId: string): Promise<AudioFetchResult> {
   await detectYtDlp();
   if (_preferYtDlp && _ytdlpFetch) {
-    try {
-      return await _ytdlpFetch(videoId);
-    } catch (e) {
-      // eslint-disable-next-line no-console
-      console.warn("yt-dlp fetch failed, falling back to youtubei.js:", (e as Error).message);
-    }
+    // When yt-dlp is the primary path, let its errors propagate. Falling
+    // back to youtubei.js silently masks the real cause (e.g. YouTube
+    // refusing cloud-IP traffic) with a misleading "Streaming data not
+    // available" from the JS path, which is broken anyway under current
+    // po_token enforcement.
+    return await _ytdlpFetch(videoId);
   }
   return fetchAudioStreamYtJs(videoId);
 }
