@@ -56,7 +56,21 @@ async function fetchEmbed(kind: string, id: string): Promise<any> {
 }
 
 function entity(next: any): any {
-  const e = next?.props?.pageProps?.state?.data?.entity;
+  // Personalized content (Daily Mix, Discover Weekly, Made For You, the
+  // various algorithmic Mix-Of-X playlists) is gated behind an authenticated
+  // session. The embed endpoint refuses to render it: HTTP 200, but the
+  // NEXT_DATA blob has `pageProps.status === 404` and no `state`. The `pt=`
+  // share token is recognised but doesn't unlock the page either. Detect
+  // and surface a user-actionable message rather than the generic shape
+  // error — the frontend's friendlyError() picks up "personalized" / "mix"
+  // and explains the situation.
+  const pp = next?.props?.pageProps;
+  if (pp?.status === 404 || (pp && !pp.state)) {
+    throw new ResolverError(
+      "Spotify: this playlist requires authentication — looks like a personalized Mix (Daily Mix, Discover Weekly, etc.). Only public, shared playlists work without an account.",
+    );
+  }
+  const e = pp?.state?.data?.entity;
   if (!e) throw new ResolverError("Spotify embed: pageProps.state.data.entity missing");
   return e;
 }

@@ -44,6 +44,8 @@
   function friendlyError(raw) {
     if (!raw) return "Something went wrong.";
     const r = raw.toLowerCase();
+    if (r.includes("requires authentication") || r.includes("personalized") || r.includes("daily mix") || r.includes("discover weekly"))
+      return "This is a personalized Spotify Mix (Daily Mix, Discover Weekly, etc.) — those need a Spotify account to view. Only public shared playlists work here.";
     if (r.includes("no confident") || r.includes("no match"))
       return "Couldn't find this on YouTube.";
     if (r.includes("video unavailable"))
