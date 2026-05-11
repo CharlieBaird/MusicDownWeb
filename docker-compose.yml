@@ -1,0 +1,13 @@
+services:
+  web:
+    build: .
+    image: musicdownweb
+    restart: unless-stopped
+    ports:
+      - "8787:8787"
+    environment:
+      # Single-origin Pi mode — frontend served from the same port, no CORS.
+      # Override to a comma-separated list (or "*") if you ever split origins.
+      ALLOWED_ORIGINS: "*"
+    # Stateless — no volumes. Temp audio files live in the container's tmp
+    # and are deleted as soon as the response stream closes.

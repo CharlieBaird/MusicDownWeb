@@ -11,17 +11,24 @@ Narrative + deploy notes are in [README.md](README.md). What follows is operatio
 ## Commands
 
 ```sh
+# Recommended deploy (matches sibling MusicDown's pattern)
+docker compose up -d --build           # → http://localhost:8787
+docker compose logs -f                 # tail
+docker compose down                    # stop
+
+# Development (no container)
 cd worker
-npm install                    # one-time
-npm run serve-node             # Pi/local — Node HTTP server on :8787 + serves frontend
-npm run dev                    # wrangler dev — CF Workers local sim (audio path won't work)
-npm run deploy                 # wrangler deploy (needs `wrangler login`)
-npm run typecheck              # tsc --noEmit
+npm install                            # one-time
+npm run serve-node                     # Node server on :8787, serves frontend too
+npm run dev                            # wrangler dev — CF Workers local sim (audio won't work)
+npm run typecheck                      # tsc --noEmit
 ```
 
-The Node entrypoint serves both the API and the `frontend/` directory on the same origin, so there's no CORS to configure for the Pi setup. Open `http://localhost:8787`.
+The Node entrypoint (and the container that wraps it) serves both the API and the `frontend/` directory on the same origin, so there's no CORS to configure for the Pi setup. Open `http://localhost:8787`.
 
-Frontend has no build step — vanilla JS/HTML/CSS, edit and refresh. `frontend/config.js` holds `WORKER_URL` (empty = same-origin = Pi mode; full origin string = CF Workers mode).
+Frontend has no build step — vanilla JS/HTML/CSS, edit and refresh. In dev `npm run serve-node` picks up `frontend/*` changes immediately. In docker mode, frontend files are baked into the image — `docker compose up --build` to rebuild after editing.
+
+`frontend/config.js` holds `WORKER_URL` (empty = same-origin = Pi mode; full origin string = CF Workers mode).
 
 ## Architecture
 

@@ -1,0 +1,8 @@
+**/node_modules
+**/.wrangler
+**/.cache
+.git
+.gitignore
+*.log
+.DS_Store
+Thumbs.db

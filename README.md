@@ -40,7 +40,18 @@ A pure-browser version is impossible. CORS blocks any webpage from fetching Spot
 
 ## Deployment
 
-### Pi / Node — the one that works today
+### Pi (Docker) — recommended
+
+```sh
+docker compose up -d --build
+# → http://localhost:8787
+```
+
+The image ships Node + `yt-dlp` (via pip) + `ffmpeg`. Same `docker compose` invocation works on Pi 4/5. Aarch64 wheels exist for everything we depend on. Tail logs with `docker compose logs -f`.
+
+To put it behind your existing Caddy / VPS / WireGuard setup (per the sibling [MusicDown's ONBOARDING](../MusicDown/ONBOARDING.md)), route `<some-host>` → `pi:8787`. No CORS needed since the frontend is same-origin with the API.
+
+### Pi (bare Node) — alternative
 
 ```sh
 cd worker
@@ -49,9 +60,7 @@ npm run serve-node
 # → http://localhost:8787
 ```
 
-**Requires `yt-dlp` on PATH.** YouTube's mid-2026 po_token enforcement leaves pure-JS clients (youtubei.js, ytdl-core, etc.) with empty audio URLs. The Worker detects yt-dlp at startup and uses it as the primary audio fetcher. The `youtubei.js` path remains as a fallback but is currently non-functional against YouTube's anti-bot. `ffmpeg` is also required (for yt-dlp's `--remux-video m4a`).
-
-The same Pi that runs MusicDown already has both. Just symlink or alias yt-dlp into `node_modules/.bin/` if it's not on PATH, or `export YTDLP_BIN=/path/to/yt-dlp`.
+**Requires `yt-dlp` + `ffmpeg` on PATH.** YouTube's mid-2026 po_token enforcement leaves pure-JS clients (youtubei.js, ytdl-core, etc.) with empty audio URLs. The Worker detects yt-dlp at startup and uses it as the primary audio fetcher. The `youtubei.js` path remains as a fallback but is currently non-functional against YouTube's anti-bot. Use `export YTDLP_BIN=/path/to/yt-dlp` if it's not on PATH.
 
 ### Cloudflare Workers — partially functional
 
@@ -71,6 +80,7 @@ Caveat: `/resolve` and `/match` work; `/audio/:id` currently does NOT, because W
 
 | Path | What it is |
 |---|---|
+| `Dockerfile`, `docker-compose.yml` | Recommended deploy. Node + yt-dlp + ffmpeg on a single image. |
 | `worker/src/index.ts` | Flat router — three endpoints + CORS. Same `handle()` runs on CF Workers and Node. |
 | `worker/src/cors.ts` | Allow-list CORS helper. Env: `ALLOWED_ORIGINS`. |
 | `worker/src/types.ts` | Shared shapes (`Track`, `ResolvedSource`, `YouTubeCandidate`). |
@@ -89,9 +99,8 @@ Caveat: `/resolve` and `/match` work; `/audio/:id` currently does NOT, because W
 ## First run
 
 ```sh
-cd MusicDownWeb/worker
-npm install
-npm run serve-node
+cd MusicDownWeb
+docker compose up -d --build
 ```
 
 Then open `http://localhost:8787`, paste:
